@@ -1,2 +1,9 @@
-streamlit
-joblib
+fastapi
+uvicorn
+torch
+torchvision
+ultralytics
+opencv-python
+pillow
+pyyaml
+requests
