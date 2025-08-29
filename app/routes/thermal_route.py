@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter,Form, UploadFile, File
 from app.services.thermal_predict import thermal_prediction
 
 router = APIRouter()
