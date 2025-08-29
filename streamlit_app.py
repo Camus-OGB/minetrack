@@ -16,7 +16,7 @@ if uploaded_file:
         with st.spinner("Analyse en cours..."):
             files = {"file": (uploaded_file.name, uploaded_file, uploaded_file.type)}
             try:
-                response = requests.post(API_URL, files=files, timeout=30)
+                response = requests.post(API_URL, files=files)
                 response.raise_for_status()
             except requests.exceptions.RequestException as e:
                 st.error(f"Erreur lors de l'envoi à l'API : {e}")
