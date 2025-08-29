@@ -7,3 +7,4 @@ opencv-python
 pillow
 pyyaml
 requests
+python-miltipart
