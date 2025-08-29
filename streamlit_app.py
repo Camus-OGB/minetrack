@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 from PIL import Image, ImageDraw
-import io
 
 API_URL = "https://minetrack-6xv1.onrender.com/predict/thermal"
 
@@ -15,27 +14,25 @@ if uploaded_file:
 
     if st.button("Analyser l'image"):
         with st.spinner("Analyse en cours..."):
-            files = {"file": uploaded_file.getvalue()}
-            response = requests.post(API_URL, files={"file": uploaded_file})
-        
-        if response.status_code == 200:
-            result = response.json()
-            detections = result["detections"]
+            files = {"file": (uploaded_file.name, uploaded_file, uploaded_file.type)}
+            try:
+                response = requests.post(API_URL, files=files, timeout=30)
+                response.raise_for_status()
+            except requests.exceptions.RequestException as e:
+                st.error(f"Erreur lors de l'envoi à l'API : {e}")
+            else:
+                result = response.json()
+                detections = result.get("detections", [])
 
-            # Charger l'image et dessiner les boîtes
-            image = Image.open(uploaded_file).convert("RGB")
-            draw = ImageDraw.Draw(image)
+                # Dessiner les boîtes sur l'image
+                image = Image.open(uploaded_file).convert("RGB")
+                draw = ImageDraw.Draw(image)
 
-            for det in detections:
-                bbox = det["bbox"]
-                confidence = det["confidence"]
-                class_id = det["class_id"]
+                for det in detections:
+                    bbox = det["bbox"]
+                    confidence = det["confidence"]
+                    draw.rectangle(bbox, outline="red", width=3)
+                    draw.text((bbox[0], bbox[1] - 10), f"{confidence:.2f}", fill="red")
 
-                # Dessiner la boîte
-                draw.rectangle(bbox, outline="red", width=3)
-                draw.text((bbox[0], bbox[1] - 10), f"{confidence:.2f}", fill="red")
-
-            st.image(image, caption="Image avec détections", use_column_width=True)
-            st.success(f"{len(detections)} détection(s) trouvée(s)")
-        else:
-            st.error("Erreur lors de l'envoi à l'API : " + response.text)
+                st.image(image, caption="Image avec détections", use_column_width=True)
+                st.success(f"{len(detections)} détection(s) trouvée(s)")
