@@ -7,7 +7,7 @@ app = FastAPI()
 
 # Configuration CORS
 origins = [
-    "https://minetrack-bl8g6fdgkdb5khq8qrahzn.streamlit.app/",
+    "https://minetrack-bl8g6fdgkdb5khq8qrahzn.streamlit.app",
 ]
 
 app.add_middleware(
