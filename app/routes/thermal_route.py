@@ -15,3 +15,4 @@ async def predict_thermal(file: UploadFile = File(...)):
         return result
     except Exception as e:
         return {"error": str(e)}
+
