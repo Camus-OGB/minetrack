@@ -4,7 +4,8 @@ from PIL import Image, ImageDraw
 
 # API_URL = "https://minetrack-6xv1.onrender.com/predict/thermal"
 # API_URL = "http://localhost:8002/thermal"
-API_URL = "https://minetrack-a83f.onrender.com/predict/thermal"
+# API_URL = "https://minetrack-a83f.onrender.com/predict/thermal"
+API_URL = "http://127.0.0.1:8000/predict/thermal"
 
 st.title("Détection de Mines sur Image Thermique")
 st.markdown("Envoyez une image thermique, et recevez les prédictions du modèle YOLOv8.")
