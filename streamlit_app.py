@@ -15,6 +15,20 @@ st.title("🔍 Minetrack - Détection de Mines")
 st.markdown("### Analyse d'images thermiques avec YOLOv8")
 st.markdown("Téléchargez une image thermique pour détecter la présence de mines terrestres.")
 
+# Test de connexion à l'API
+with st.sidebar:
+    st.markdown("### 🔌 État de l'API")
+    try:
+        health_response = requests.get(API_URL.replace("/predict/thermal", "/health"), timeout=10)
+        if health_response.status_code == 200:
+            st.success("✅ API connectée")
+        else:
+            st.warning("⚠️ API inaccessible")
+    except:
+        st.error("❌ API hors ligne")
+        st.caption(f"URL: {API_URL}")
+        st.info("💡 Si l'API est sur Render (gratuit), elle peut prendre 30-60s à démarrer après inactivité.")
+
 col1, col2 = st.columns([1, 1])
 
 with col1:
@@ -30,10 +44,10 @@ with col1:
 with col2:
     if uploaded_file:
         if st.button("🔍 Analyser l'image", type="primary", use_container_width=True):
-            with st.spinner("Analyse en cours..."):
+            with st.spinner("Analyse en cours... (cela peut prendre jusqu'à 1 minute)"):
                 files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
                 try:
-                    response = requests.post(API_URL, files=files, timeout=30)
+                    response = requests.post(API_URL, files=files, timeout=90)
                     response.raise_for_status()
                     
                     result = response.json()
