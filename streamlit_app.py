@@ -1,41 +1,71 @@
 import streamlit as st
 import requests
 from PIL import Image, ImageDraw
+import os
 
-# API_URL = "https://minetrack-6xv1.onrender.com/predict/thermal"
-# API_URL = "http://localhost:8002/thermal"
-# API_URL = "https://minetrack-a83f.onrender.com/predict/thermal"
-API_URL = "http://127.0.0.1:8000/predict/thermal"
+API_URL = os.getenv("API_URL", "https://minetrack-a83f.onrender.com/predict/thermal")
 
-st.title("Détection de Mines sur Image Thermique")
-st.markdown("Envoyez une image thermique, et recevez les prédictions du modèle YOLOv8.")
+st.set_page_config(
+    page_title="Minetrack - Détection de Mines",
+    page_icon="🔍",
+    layout="wide"
+)
 
-uploaded_file = st.file_uploader("Choisissez une image thermique (JPG/PNG)", type=["jpg", "jpeg", "png"])
+st.title("🔍 Minetrack - Détection de Mines")
+st.markdown("### Analyse d'images thermiques avec YOLOv8")
+st.markdown("Téléchargez une image thermique pour détecter la présence de mines terrestres.")
 
-if uploaded_file:
-    st.image(uploaded_file, caption="Image originale", use_container_width=True)
 
-    if st.button("Analyser l'image"):
-        with st.spinner("Analyse en cours..."):
-            files = {"file": (uploaded_file.name, uploaded_file, uploaded_file.type)}
-            try:
-                response = requests.post(API_URL, files=files, timeout=30)
-                response.raise_for_status()
-            except requests.exceptions.RequestException as e:
-                st.error(f"Erreur lors de l'envoi à l'API : {e}")
-            else:
-                result = response.json()
-                detections = result.get("detections", [])
+col1, col2 = st.columns([1, 1])
 
-                # Dessiner les boîtes sur l'image
-                image = Image.open(uploaded_file).convert("RGB")
-                draw = ImageDraw.Draw(image)
+with col1:
+    uploaded_file = st.file_uploader(
+        "📁 Choisissez une image thermique", 
+        type=["jpg", "jpeg", "png"],
+        help="Formats acceptés: JPG, JPEG, PNG"
+    )
+    
+    if uploaded_file:
+        st.image(uploaded_file, caption="Image originale", use_container_width=True)
 
-                for det in detections:
-                    bbox = det["bbox"]
-                    confidence = det["confidence"]
-                    draw.rectangle(bbox, outline="red", width=3)
-                    draw.text((bbox[0], bbox[1] - 10), f"{confidence:.2f}", fill="red")
+with col2:
+    if uploaded_file:
+        if st.button("🔍 Analyser l'image", type="primary", use_container_width=True):
+            with st.spinner("Analyse en cours..."):
+                files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
+                try:
+                    response = requests.post(API_URL, files=files, timeout=30)
+                    response.raise_for_status()
+                    
+                    result = response.json()
+                    detections = result.get("detections", [])
 
-                st.image(image, caption="Image avec détections", use_column_width=True)
-                st.success(f"{len(detections)} détection(s) trouvée(s)")
+                    image = Image.open(uploaded_file).convert("RGB")
+                    draw = ImageDraw.Draw(image)
+
+                    for det in detections:
+                        bbox = det["bbox"]
+                        confidence = det["confidence"]
+                        draw.rectangle(bbox, outline="red", width=3)
+                        draw.text((bbox[0], bbox[1] - 10), f"{confidence:.2f}", fill="red")
+
+                    st.image(image, caption="Résultat de l'analyse", use_container_width=True)
+                    
+                    if len(detections) > 0:
+                        st.error(f"⚠️ {len(detections)} mine(s) détectée(s)")
+                        
+                        with st.expander("Détails des détections"):
+                            for i, det in enumerate(detections, 1):
+                                st.write(f"**Mine {i}** - Confiance: {det['confidence']:.2%}")
+                                st.write(f"Position: {det['bbox']}")
+                    else:
+                        st.success("✅ Aucune mine détectée")
+                        
+                except requests.exceptions.RequestException as e:
+                    st.error(f"❌ Erreur de connexion à l'API: {str(e)}")
+                except Exception as e:
+                    st.error(f"❌ Erreur: {str(e)}")
+
+st.divider()
+st.markdown("**Note:** Cette application utilise un modèle YOLOv8 entraîné sur des images thermiques.")
+
