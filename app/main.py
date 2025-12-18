@@ -17,11 +17,11 @@ app = FastAPI(
 )
 
 # Configuration CORS
-origins = os.getenv("CORS_ORIGINS", "https://minetrack-bl8g6fdgkdb5khq8qrahzn.streamlit.app").split(",")
+origins = os.getenv("CORS_ORIGINS", "*").split(",")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,      # domaines autorisés
+    allow_origins=["*"] if "*" in origins else origins,      # domaines autorisés
     allow_credentials=True,     # autoriser cookies et auth
     allow_methods=["*"],        # autoriser toutes les méthodes (GET, POST...)
     allow_headers=["*"],        # autoriser tous les headers
