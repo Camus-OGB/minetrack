@@ -3,7 +3,7 @@ import requests
 from PIL import Image, ImageDraw
 import os
 
-API_URL = os.getenv("API_URL", "https://minetrack-a83f.onrender.com/predict/thermal")
+API_URL = os.getenv("API_URL", "https://minetrack-6xv1.onrender.com/predict/thermal")
 
 st.set_page_config(
     page_title="Minetrack - Détection de Mines",
