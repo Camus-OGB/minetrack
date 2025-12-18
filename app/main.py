@@ -2,13 +2,22 @@ from fastapi import FastAPI
 from app.routes.thermal_route import router as thermal_route
 from app.routes.mlp_route import router as mlp_route
 from fastapi.middleware.cors import CORSMiddleware
+import os
+from dotenv import load_dotenv
 
-app = FastAPI()
+# Load environment variables
+load_dotenv()
+
+app = FastAPI(
+    title="Minetrack API",
+    description="API de détection de mines terrestres utilisant YOLOv8 et MLP",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
 
 # Configuration CORS
-origins = [
-    "https://minetrack-bl8g6fdgkdb5khq8qrahzn.streamlit.app",
-]
+origins = os.getenv("CORS_ORIGINS", "https://minetrack-bl8g6fdgkdb5khq8qrahzn.streamlit.app").split(",")
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,4 +27,28 @@ app.add_middleware(
     allow_headers=["*"],        # autoriser tous les headers
 )
 
-app.include_router(thermal_route, prefix="/predict", tags=["Thermal YOLOv8"])
+# Include routers
+app.include_router(thermal_route, prefix="/predict", tags=["Thermal Detection"])
+app.include_router(mlp_route, prefix="/predict", tags=["Magnetic Detection"])
+
+@app.get("/", tags=["Health"])
+async def root():
+    """
+    Point d'entrée de l'API - Health check
+    """
+    return {
+        "message": "Minetrack API is running",
+        "version": "1.0.0",
+        "endpoints": {
+            "thermal": "/predict/thermal",
+            "magnetic": "/predict/mlp",
+            "docs": "/docs"
+        }
+    }
+
+@app.get("/health", tags=["Health"])
+async def health_check():
+    """
+    Vérification de l'état de l'API
+    """
+    return {"status": "healthy"}
