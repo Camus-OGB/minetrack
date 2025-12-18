@@ -15,18 +15,6 @@ st.title("🔍 Minetrack - Détection de Mines")
 st.markdown("### Analyse d'images thermiques avec YOLOv8")
 st.markdown("Téléchargez une image thermique pour détecter la présence de mines terrestres.")
 
-
-    if st.button("Analyser l'image"):
-        with st.spinner("Analyse en cours..."):
-            files = {"file": (uploaded_file.name, uploaded_file, uploaded_file.type)}
-            try:
-                response = requests.post(API_URL, files=files)
-                response.raise_for_status()
-            except requests.exceptions.RequestException as e:
-                st.error(f"Erreur lors de l'envoi à l'API : {e}")
-            else:
-                result = response.json()
-                detections = result.get("detections", [])
 col1, col2 = st.columns([1, 1])
 
 with col1:
